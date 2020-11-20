@@ -6,7 +6,7 @@ WS20 LKESP2 Project
 
 ### 1. Set timezone 
 * important for make
-*
+
 ### 2. Expand filesystem
 
 ```bash
@@ -62,7 +62,7 @@ sudo apt install libncurses5-dev
 sudo apt install wiringpi
 ```
 
-### 9. Create ssh key and add to github 
+### 9.(Optional) Create ssh key and add to github 
 
 ```bash
 # create key
