@@ -77,10 +77,40 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 
 ## Hardware Setup
 
-* Hitachi HD44780U
+### HD44780U
 
-| HD44780U | Raspberry Pi |
-|----------|--------------|
-|  VSS     |   Ground     |
-|  VCC     |     5V       |
+| HD44780U | Raspberry Pi | wiringPi |
+|----------|--------------|----------|
+| VSS      | Ground       |          |
+| VCC      | 5V           |          |
+| V0       | GPIO 26      |          |
+| RS       | Ground       |          |
+| E        | GPIO 19      |          |
+| D0       |              |          |
+| D1       |              |          |
+| D2       |              |          |
+| D3       |              |          |
+| D4       | GPIO 13      | 23       |
+| D5       | GPIO 6       | 22       |
+| D6       | GPIO 5       | 21       |
+| D7       | GPIO 11      | 14       |
+| A        | 5V           |          |
+| K        | Ground       |          |
+
+### DS3231
+
+### DS1302
+
+## Usage
+
+## Developer
+
+* [Felix Knorre](felix-knorre@hotmail.de)
+
+## License
+
+## Links
+
+* [Buildung Kernel](https://www.raspberrypi.org/documentation/linux/kernel/building.md)
+* [wiringPi](http://wiringpi.com/)
 
