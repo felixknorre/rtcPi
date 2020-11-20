@@ -1,7 +1,8 @@
-# Raspberry Pi RTC Kernel Module
+# rtcPi
+Raspberry Pi RTC Kernel Module
 WS20 LKESP2 Project
 
-## Setup Raspberry Pi for kernel module development
+## Software Setup Raspberry Pi for kernel module development
 
 ### 1. Set timezone 
 * important for make
@@ -58,6 +59,7 @@ sudo apt install module-assistant
 sudo apt install kernel-package
 sudo apt install  fakeroot
 sudo apt install libncurses5-dev
+sudo apt install wiringpi
 ```
 
 ### 9. Create ssh key and add to github 
@@ -72,3 +74,13 @@ ssh-add ~/.ssh/id_rsa
 sudo apt install xclip
 xclip -selection clipboard < ~/.ssh/id_rsa.pub
 ```
+
+## Hardware Setup
+
+* Hitachi HD44780U
+
+| HD44780U | Raspberry Pi |
+|----------|--------------|
+|  VSS     |   Ground     |
+|  VCC     |     5V       |
+
