@@ -109,6 +109,8 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 
 ## License
 
+* [GPL-2.0](LICENSE.md)
+
 ## Links
 
 * [Buildung Kernel](https://www.raspberrypi.org/documentation/linux/kernel/building.md)
