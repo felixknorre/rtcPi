@@ -107,6 +107,22 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 
 ## Usage
 
+### Kernel Module
+
+#### Compile
+
+```bash
+cd rtcPi
+make
+```
+
+#### De-/Load Module
+
+```bash
+sudo insmod rtcPi.ko
+sudo rmmod rtcPi
+```
+
 ## Developer
 
 * [Felix Knorre](felix-knorre@hotmail.de)
