@@ -2,10 +2,6 @@
 Raspberry Pi RTC Kernel Module
 WS20 LKESP2 Project
 
-includes:
-* rtcPi (kernel module)
-* readMod (programm to read from kernel module and display content lcd display)
-
 ## Software Setup Raspberry Pi for kernel module development
 
 ### 1. Set timezone 
@@ -57,7 +53,7 @@ sudo cp arch/arm/boot/zImage /boot/$KERNEL.img
 ln -s /usr/src/linux /lib/modules/$(uname -r)/build
 ```
 
-### 8. Install additiona packages
+### 8. Install additional packages
 ```bash
 sudo apt install module-assistant
 sudo apt install kernel-package
@@ -121,6 +117,21 @@ make
 ```bash
 sudo insmod rtcPi.ko
 sudo rmmod rtcPi
+```
+
+###  LCD Programm
+
+#### Compile
+
+```bash
+cd readMod
+make
+```
+
+#### Run
+
+```bash
+./readMod
 ```
 
 ## Developer
