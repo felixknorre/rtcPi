@@ -26,7 +26,7 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
-#include <wiringPi.h>
+// #include <wiringPi.h>
 
 #define DRIVER_NAME "rtcPi"
 #define CLASS_NAME "rtcPiClass"
