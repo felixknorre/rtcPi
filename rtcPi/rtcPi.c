@@ -26,6 +26,8 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
+#include <wiringPi.h>
+
 #define DRIVER_NAME "rtcPi"
 #define CLASS_NAME "rtcPiClass"
 #define DEVICE_Name  "rtcPi"
@@ -38,22 +40,27 @@
 /***************************************/
 
 static int mod_open(struct inode* fsdev, struct file * mm_entity){
-    return 0;
+  printk("rtcPi: opend...\n");
+  return 0;
 }
 
 static int mod_close(struct inode* fsdev, struct file * mm_entity){
+  printk("rtcPi: closed...\n");
     return 0;
 }
 
 static ssize_t mod_write(struct file * mm_entity, const char * buffer, size_t count, loff_t * offset){
+  printk("rtcPi: write...\n");
     return 0;
 }
 
 static ssize_t mod_read(struct file * mm_entity, char * buffer, size_t count, loff_t * offset){
+  printk("rtcPi: read...\n");
     return 0;
 }
 
 static long mod_ioctl(struct file * mm_entitiy, unsigned int cmd, unsigned long arg){
+  printk("rtcPi: ioctl...\n");
     return 0;
 }
 
@@ -69,12 +76,12 @@ static struct cdev* mod_cdev_object = NULL;
 
 // file operations, POSIX functions
 static struct file_operations f_op = {
+  .owner = THIS_MODULE,
   .open = mod_open,
   .release = mod_close,
   .read = mod_read,
   .write = mod_write,
-  .unlocked_ioctl = mod_ioctl,
-  .owner = THIS_MODULE
+  .unlocked_ioctl = mod_ioctl
 };
   
 // class

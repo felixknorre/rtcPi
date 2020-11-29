@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     lcdClear(lcd);
     
     // open mod
-    fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
+    fd = open(DEVICE_NAME, O_RDWR | O_NONBLOCK);
     if(fd < 0){
 		lcdPosition(lcd, 2, 0);
 		lcdPuts(lcd, "can't open");
@@ -82,10 +82,19 @@ int main(int argc, char *argv[])
 		sleep(5);
 		lcdClear(lcd);
 		return -1;
+	} else {
+		lcdPosition(lcd, 4, 0);
+		lcdPuts(lcd, "opened");
+		lcdPosition(lcd, 4, 1);
+		lcdPuts(lcd, "device...");
+		close(fd);
+		sleep(5);
+		lcdClear(lcd);
+		return 0;
 	}
 	
 	// read time from mod every second
-	while(1){
+	/*while(1){
 		// BUFFER_SIZE-1 because of \0
 		read_result = read(fd, buf, BUFFER_SIZE-1);
 		if(read_result < 0){
@@ -105,7 +114,7 @@ int main(int argc, char *argv[])
 			lcdPosition(lcd, 2, 1);
 			lcdPuts(lcd, "Time: ");
 		}
-	}
+	} */
 	
 	// TODO: when should it close ?
 	close(fd);
