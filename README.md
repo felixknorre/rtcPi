@@ -146,4 +146,4 @@ make
 
 * [Buildung Kernel](https://www.raspberrypi.org/documentation/linux/kernel/building.md)
 * [wiringPi](http://wiringpi.com/)
-
+* [Linux Kernel Labs](https://linux-kernel-labs.github.io/refs/heads/master/labs/device_drivers.html)
