@@ -117,6 +117,6 @@ int main(int argc, char *argv[])
 	} */
 	
 	// TODO: when should it close ?
-	close(fd);
+	//close(fd);
 	return 0;
 }
