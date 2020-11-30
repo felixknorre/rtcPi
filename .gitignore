@@ -6,6 +6,7 @@
 
 # build dir
 */build
+readMod/readMod
 
 # Kernel Module Compile Results
 *.mod*
