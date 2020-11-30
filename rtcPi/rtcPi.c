@@ -26,6 +26,9 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
+// i2c lib
+#include <linux/i2c.h>
+
 // #include <wiringPi.h>
 
 #define DRIVER_NAME "rtcPi"
