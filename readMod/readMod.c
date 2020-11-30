@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     lcdClear(lcd);
     
     // open mod
-    fd = open(DEVICE_NAME, O_RDWR | O_NONBLOCK);
+    fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
     if(fd < 0){
 		lcdPosition(lcd, 2, 0);
 		lcdPuts(lcd, "can't open");
