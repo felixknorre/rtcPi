@@ -46,7 +46,7 @@
 #define LCD_D7 14			// Data  (GPIO 11)
 
 // Device and Buffer setup
-#define DEVICE_NAME "/dev/rtcPI"
+#define DEVICE_NAME "/dev/rtcPi"
 #define BUFFER_SIZE 128
 
 int main(int argc, char *argv[])
@@ -56,7 +56,12 @@ int main(int argc, char *argv[])
 	int fd; 
 	// buffer to store the time
 	char buf[BUFFER_SIZE];
+	// return value of read 
 	int read_result;
+	// how often should it read ?
+	int count = 5;
+	// interval between read operation(in seconds)
+	int readInterval = 10;
 
 	// lcd display setup
 	wiringPiSetup();
@@ -74,49 +79,44 @@ int main(int argc, char *argv[])
     // open mod
     fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
     if(fd < 0){
+		// open device failed
 		lcdPosition(lcd, 2, 0);
 		lcdPuts(lcd, "can't open");
 		lcdPosition(lcd, 4, 1);
 		lcdPuts(lcd, "device...");
 		close(fd);
-		sleep(5);
+		sleep(3);
 		lcdClear(lcd);
 		return -1;
 	} else {
-		lcdPosition(lcd, 4, 0);
-		lcdPuts(lcd, "opened");
-		lcdPosition(lcd, 4, 1);
-		lcdPuts(lcd, "device...");
+		// open device success
+		while(count > 0){
+			// read datetime
+			read_result = read(fd, buf, BUFFER_SIZE-1);
+			if(read_result < 0){
+				// stop if there is an error while reading
+				lcdClear(lcd);
+				lcdPosition(lcd, 2, 0);
+				lcdPuts(lcd, "error while");
+				lcdPosition(lcd, 4, 1);
+				lcdPuts(lcd, "reading...");
+				sleep(3);
+				break;
+			}
+		
+			// //display datetime on lcd
+			lcdPosition(lcd, 2, 0);
+			lcdPuts(lcd, "read device");
+			lcdPosition(lcd, 4, 1);
+			lcdPrintf(lcd, "count: %d", count);
+			
+			sleep(readInterval);
+			count--;	
+		}
+		
+		// clean up
 		close(fd);
-		sleep(5);
 		lcdClear(lcd);
 		return 0;
 	}
-	
-	// read time from mod every second
-	/*while(1){
-		// BUFFER_SIZE-1 because of \0
-		read_result = read(fd, buf, BUFFER_SIZE-1);
-		if(read_result < 0){
-			lcdClear(lcd);
-			lcdPosition(lcd, 2, 0);
-			lcdPuts(lcd, "ERROR reading");
-			lcdPosition(lcd, 4, 1);
-			lcdPuts(lcd, "device...");
-				
-		} else {
-			// new time and date
-			lcdClear(lcd);
-			// date
-			lcdPosition(lcd, 2, 0);
-			lcdPuts(lcd, "Date: ");
-			// time
-			lcdPosition(lcd, 2, 1);
-			lcdPuts(lcd, "Time: ");
-		}
-	} */
-	
-	// TODO: when should it close ?
-	//close(fd);
-	return 0;
 }
