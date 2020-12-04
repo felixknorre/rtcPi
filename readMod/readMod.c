@@ -70,15 +70,15 @@ int main(int argc, char *argv[])
 	// start text
 	lcdClear(lcd);
 	lcdPosition(lcd, 4, 0);
-    lcdPuts(lcd, "readMod");
-    lcdPosition(lcd, 4, 1);
-    lcdPuts(lcd, "loaded...");
-    sleep(2);
-    lcdClear(lcd);
+  lcdPuts(lcd, "readMod");
+  lcdPosition(lcd, 4, 1);
+  lcdPuts(lcd, "loaded...");
+  sleep(2);
+  lcdClear(lcd);
     
-    // open mod
-    fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
-    if(fd < 0){
+  // open mod
+  fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
+  if(fd < 0){
 		// open device failed
 		lcdPosition(lcd, 2, 0);
 		lcdPuts(lcd, "can't open");
