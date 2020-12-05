@@ -25,45 +25,150 @@
 #include <linux/version.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
-
-// i2c lib
 #include <linux/i2c.h>
 
-// #include <wiringPi.h>
-
+// registration
 #define DRIVER_NAME "rtcPi"
 #define CLASS_NAME "rtcPiClass"
-#define DEVICE_Name  "rtcPi"
+#define DEVICE_NAME  "rtcPi"
 
 // set debug mode to log program execution
 #define DEBUG_MODE
+// set rtc type mode
+#define RTC_TYPE "gpio"
+#define RTC_TYPE_I2C
+//#define RTC_TYPE_USB
+
+// i2crtc
+#define I2C_ADDRESS 0x68
+#define RTC_DEVICE "/dev/i2c-1"
 
 /***************************************/
 /*       Application Interface         */
 /***************************************/
 
+static int readRTC(char *);
+static int writeRTC(void);
+
 static int mod_open(struct inode* fsdev, struct file * mm_entity){
-  printk("rtcPi: opend...\n");
+  #ifdef DEBUG_MODE
+    printk("rtcPi: opend...\n");
+  #endif
+  
+  #ifdef RTC_TYPE_I2C
+  
+  struct i2c_client *client;
+  struct i2c_adapter *adapter;
+  
+  adapter = i2c_get_adapter(MINOR(mod_dn));
+  if(adapter == NULL){
+    return -1;
+  }
+  
+  // kzalloc alloc memory and set it to zero
+  //GFP_KERNEL -> get free pages
+  client = kzalloc(sizeof(*client), GFP_KERNEL);
+  if(client == NULL){
+      return -1;
+  }
+  
+  client->name = "ds3231"
+  client->addr = I2C_ADDRESS;
+  client->adapter = adapter;
+  
+  // store data
+  mm_entity->private_data = client;
+  
+  #endif
+  
+  
   return 0;
 }
 
 static int mod_close(struct inode* fsdev, struct file * mm_entity){
-  printk("rtcPi: closed...\n");
-    return 0;
+  #ifdef DEBUG_MODE
+    printk("rtcPi: closed...\n");
+  #endif
+  
+  #ifdef
+    struct i2c_client *client = mm_entity->private_data;
+    i2c_put_adapter(client->adapter);
+    kfree(client); 
+    mm_entity->private_data = NULL;
+  #endif
+  return 0;
 }
 
 static ssize_t mod_write(struct file * mm_entity, const char * buffer, size_t count, loff_t * offset){
-  printk("rtcPi: write...\n");
-    return 0;
+  #ifdef DEBUG_MODE
+    printk("rtcPi: write...\n");
+  #endif
+  return 0;
 }
 
 static ssize_t mod_read(struct file * mm_entity, char * buffer, size_t count, loff_t * offset){
-  printk("rtcPi: read...\n");
-    return 0;
+  #ifdef DEBUG_MODE
+    printk("rtcPi: read...\n");
+  #endif
+  return 0;
 }
 
 static long mod_ioctl(struct file * mm_entitiy, unsigned int cmd, unsigned long arg){
-  printk("rtcPi: ioctl...\n");
+  // use arg to set client->addr = 0x68
+  // or don't use it and set client->addr = 0x68 as default
+  #ifdef DEBUG_MODE
+    printk("rtcPi: ioctl...\n");
+  #endif
+  return 0;
+}
+
+/***************************************/
+/*          Read/Write RTC             */
+/***************************************/
+
+static int writeRTC(){
+  if(RTC_TYPE == "gpio"){
+    writeGPIORTC();
+    return 0;
+  } else if (RTC_TYPE == "usb"){
+    writeUSBRTC();
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
+static int writeGPIORTC(){
+    // create 
+    static const i2c_device_id rtc_id[] = {
+        {"ds3231", ds_3231},
+        { }
+    }
+  
+    return 0;
+}
+
+static int writeUSBRTC(){
+    return 0;
+}
+
+static int readRTC(char *buf){
+  if(RTC_TYPE == "gpio"){
+    readGPIORTC(buf);
+    return 0;
+  } else if (RTC_TYPE == "usb"){
+    readUSBRTC(buf);
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
+static int readGPIORTC(char *buf){
+    return 0;
+}
+
+static int readUSBRTC(char *buf){
     return 0;
 }
 
@@ -134,7 +239,7 @@ int registration(void){
   }
   
   // 6. create device in /dev
-  mod_device = device_create(mod_class, NULL, mod_dn, NULL, DEVICE_Name);
+  mod_device = device_create(mod_class, NULL, mod_dn, NULL, DEVICE_NAME);
   if(mod_device == NULL){
       printk("rtcPi ERROR: create device failed...\n");
       goto free_class;

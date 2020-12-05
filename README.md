@@ -1,6 +1,5 @@
 # rtcPi
 Raspberry Pi RTC Kernel Module
-WS20 LKESP2 Project
 
 ## Software Setup Raspberry Pi for kernel module development
 
@@ -99,6 +98,23 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 
 ### DS3231
 
+| DS3231 | Raspberry Pi |
+|--------|--------------|
+| VIN    | 3V3 Power    |
+| GND    | Ground       |
+| SCL    | GPIO 3 (SCL) |
+| SDA    | GPIO 2 (SDA) |
+| BAT    |              |
+| 32K    |              |
+| SWQ    |              |
+| RST    |              |
+
+```bash
+sudo i2cdetect -y 1
+sudo usermod -aG i2c pi
+```
+Should show that a device with the address 68 is connected.
+
 ### DS1302
 
 ## Usage
@@ -147,3 +163,4 @@ make
 * [Buildung Kernel](https://www.raspberrypi.org/documentation/linux/kernel/building.md)
 * [wiringPi](http://wiringpi.com/)
 * [Linux Kernel Labs](https://linux-kernel-labs.github.io/refs/heads/master/labs/device_drivers.html)
+
