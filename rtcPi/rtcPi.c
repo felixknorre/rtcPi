@@ -60,6 +60,7 @@ int rtc_i2c_write(const struct i2c_client *, const char *, int);
 
 
 static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
+  /*
 #ifdef RTC_TYPE_I2C
 
     struct i2c_client *client;
@@ -86,6 +87,7 @@ static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
     mm_entity->private_data = client;
 
 #endif
+*/
 
 #ifdef DEBUG_MODE
     printk("rtcPi: opend...\n");
@@ -151,7 +153,7 @@ static int rtc_remove(struct i2c_client * client){
 static struct i2c_device_id rtc_idtable[] = {
     {RTC_NAME, 0},
     {},
-}
+};
 
 MODULE_DEVICE_TABLE(i2c, rtc_idtable);
 
@@ -162,7 +164,7 @@ static struct i2c_driver rtc_driver = {
     .id_table = rtc_idtable,
     .probe = rtc_probe,
     .remove = rtc_remove,
-}
+};
 
 static struct i2c_client *rtc_client;
 
@@ -170,7 +172,7 @@ static struct i2c_board_info rtc_i2c_board_info[] = {
     {
         I2C_BOARD_INFO(RTC_NAME, I2C_RTC_ADDRESS),
     },
-}
+};
 
   
 
@@ -180,27 +182,37 @@ int rtc_i2c_init(){
   struct i2c_adapter *adapter = i2c_get_adapter(I2C_ADAPTER_NR);
   if(adapter == NULL){
       printk("rtcPi ERROR: get i2c adapter failed...\n");
-      return -1;
+      goto no_adapter;
   }
   
   result = i2c_add_driver(&rtc_driver);
   if(result != 0){
       printk("rtcPi ERROR: create i2c driver failed...\n");
-      return -1;
+      goto put_adapter;
   }
   
-  rtc_client = i2c_new_device(adapter, &rtc_i2c_board_info);
+  rtc_client = i2c_new_device(adapter, &rtc_i2c_board_info[0]);
   if(rtc_client  == NULL){
     printk("rtcPi ERROR: create i2c device failed...\n");
-    return -1;
+    goto free_driver;
   }
   
+  
+  i2c_put_adapter(adapter);
   return 0;
+  
+free_driver:
+    i2c_del_driver(&rtc_driver);
+put_adapter:
+    i2c_put_adapter(adapter);
+no_adapter:
+    return -1;
 }
 
 // delete client/driver
 void rtc_i2c_exit(){
-  // TODO: remove device and driver
+  i2c_unregister_device(&client);
+  i2c_del_driver(&rtc_driver);
 
 }
 
@@ -211,7 +223,7 @@ int rtc_i2c_read(const struct i2c_client * client, const char * buf, int byte){
 
 // write to i2c bus
 int rtc_i2c_write(const struct i2c_client *client, const char * buf, int byte){
-  
+  return 0;
 }
 
 /***************************************/
@@ -332,7 +344,7 @@ static int __init rtcpi_init(void) {
         return -1;
     }
     
-    result = 
+    result = rtc_i2c_init();
 
     return 0;
 }
