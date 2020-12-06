@@ -89,22 +89,24 @@ static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
 #endif
 */
 
+
+
 #ifdef DEBUG_MODE
     printk("rtcPi: opend...\n");
 #endif
-
-
 
     return 0;
 }
 
 static int rtcpi_close(struct inode* fsdev, struct file * mm_entity) {
+/*
 #ifdef RTC_TYPE_I2C
     struct i2c_client *client = mm_entity->private_data;
     i2c_put_adapter(client->adapter);
     kfree(client);
     mm_entity->private_data = NULL;
 #endif
+*/
 
 #ifdef DEBUG_MODE
     printk("rtcPi: closed...\n");
