@@ -39,16 +39,25 @@
 #define RTC_TYPE_I2C
 //#define RTC_TYPE_USB
 
-// i2crtc
-#define I2C_ADDRESS 0x68
+// i2c
+#define I2C_DRIVER_NAME "i2c-rtc"
+#define I2C_RTC_ADDRESS 0x68
+#define I2C_ADAPTER_NR 1
+#define RTC_NAME "ds3231"
 
+
+ // create and delete 
+int rtc_i2c_init(void);
+void rtc_i2c_exit(void);
+
+// read and write to the i2c bus
+int rtc_i2c_read(const struct i2c_client *, const char *, int);
+int rtc_i2c_write(const struct i2c_client *, const char *, int);
 
 /***************************************/
 /*       Application Interface         */
 /***************************************/
 
-static int readRTC(char *);
-static int writeRTC(char *buf);
 
 static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
 #ifdef RTC_TYPE_I2C
@@ -57,7 +66,7 @@ static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
     struct i2c_adapter *adapter;
     char client_name[] = "ds3231";
 
-    adapter = i2c_get_adapter(iminor(fsdev));
+    adapter = i2c_get_adapter(I2C_ADAPTER_NR);
     if(adapter == NULL) {
         return -1;
     }
@@ -125,34 +134,84 @@ static long rtcpi_ioctl(struct file * mm_entitiy, unsigned int cmd, unsigned lon
     return 0;
 }
 
+
 /***************************************/
-/*          Read/Write RTC             */
+/*             I2C Client              */
 /***************************************/
 
-static int writeRTC(char *buf) {
+static int rtc_probe(struct i2c_client * client, const struct i2c_device_id * id){
     return 0;
 }
 
-static int writeGPIORTC(char *buf) {
-
-
+static int rtc_remove(struct i2c_client * client){
     return 0;
 }
 
-static int writeUSBRTC(char *buf) {
+// driver handels just one rtc
+static struct i2c_device_id rtc_idtable[] = {
+    {RTC_NAME, 0},
+    {},
+}
+
+MODULE_DEVICE_TABLE(i2c, rtc_idtable);
+
+static struct i2c_driver rtc_driver = {
+    .driver = {
+          .name = I2C_DRIVER_NAME,
+      },
+    .id_table = rtc_idtable,
+    .probe = rtc_probe,
+    .remove = rtc_remove,
+}
+
+static struct i2c_client *rtc_client;
+
+static struct i2c_board_info rtc_i2c_board_info[] = {
+    {
+        I2C_BOARD_INFO(RTC_NAME, I2C_RTC_ADDRESS),
+    },
+}
+
+  
+
+ // create client/driver
+int rtc_i2c_init(){
+  int result;
+  struct i2c_adapter *adapter = i2c_get_adapter(I2C_ADAPTER_NR);
+  if(adapter == NULL){
+      printk("rtcPi ERROR: get i2c adapter failed...\n");
+      return -1;
+  }
+  
+  result = i2c_add_driver(&rtc_driver);
+  if(result != 0){
+      printk("rtcPi ERROR: create i2c driver failed...\n");
+      return -1;
+  }
+  
+  rtc_client = i2c_new_device(adapter, &rtc_i2c_board_info);
+  if(rtc_client  == NULL){
+    printk("rtcPi ERROR: create i2c device failed...\n");
+    return -1;
+  }
+  
+  return 0;
+}
+
+// delete client/driver
+void rtc_i2c_exit(){
+  // TODO: remove device and driver
+
+}
+
+// read from i2c bus
+int rtc_i2c_read(const struct i2c_client * client, const char * buf, int byte){
     return 0;
 }
 
-static int readRTC(char *buf) {
-    return 0;
-}
-
-static int readGPIORTC(char *buf) {
-    return 0;
-}
-
-static int readUSBRTC(char *buf) {
-    return 0;
+// write to i2c bus
+int rtc_i2c_write(const struct i2c_client *client, const char * buf, int byte){
+  
 }
 
 /***************************************/
@@ -260,7 +319,6 @@ int deregistration(void) {
 
 }
 
-
 /***************************************/
 /*      Module De-/Initialization      */
 /***************************************/
@@ -270,6 +328,11 @@ static int __init rtcpi_init(void) {
     int result = 0;
 
     result = registration();
+    if(result == -1){
+        return -1;
+    }
+    
+    result = 
 
     return 0;
 }
@@ -281,7 +344,6 @@ static void __exit rtcpi_exit(void) {
 
 
 }
-
 
 module_init(rtcpi_init);
 module_exit(rtcpi_exit);
