@@ -149,6 +149,17 @@ make
 ```bash
 ./readMod
 ```
+## Docs
+
+### file structure
+1. license
+2. header
+3. macros
+4. device structure ?
+5. cdev interface
+6. i2c interface
+7. module init/exit
+8. meta info
 
 ## Developer
 
