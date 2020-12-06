@@ -51,7 +51,7 @@ int rtc_i2c_init(void);
 void rtc_i2c_exit(void);
 
 // read and write to the i2c bus
-int rtc_i2c_read(const struct i2c_client *, const char *, int);
+int rtc_i2c_read(const struct i2c_client *, char *, int);
 int rtc_i2c_write(const struct i2c_client *, const char *, int);
 
 /***************************************/
@@ -211,19 +211,19 @@ no_adapter:
 
 // delete client/driver
 void rtc_i2c_exit(){
-  i2c_unregister_device(&client);
+  i2c_unregister_device(rtc_client);
   i2c_del_driver(&rtc_driver);
 
 }
 
 // read from i2c bus
-int rtc_i2c_read(const struct i2c_client * client, const char * buf, int byte){
-    return 0;
+int rtc_i2c_read(const struct i2c_client * client, char * buf, int byte){
+    return i2c_master_recv(client, buf, byte);
 }
 
 // write to i2c bus
 int rtc_i2c_write(const struct i2c_client *client, const char * buf, int byte){
-  return 0;
+  return i2c_master_send(client, buf, byte);
 }
 
 /***************************************/
