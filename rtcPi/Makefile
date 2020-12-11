@@ -6,6 +6,7 @@
 
 ifneq ($(KERNELRELEASE),) 
 obj-m	:= rtcPi.o
+#obj-m	:= rtcI2C.o
 # my_kernel_mod-objs  := my_km.o reg.o
 
 
