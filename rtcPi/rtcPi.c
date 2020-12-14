@@ -26,6 +26,7 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/i2c.h>
+#include <linux/time.h>
 
 // registration
 #define DRIVER_NAME "rtcPi"
@@ -48,9 +49,10 @@
 */
 
 
+
 // define 
-extern int rtc_i2c_read(char , int);
-extern int rtc_i2c_write(const char, int);
+extern int rtc_i2c_read(struct tm *curr_time);
+extern int rtc_i2c_write(struct tm *curr_time);
 
 /***************************************/
 /*       Application Interface         */
@@ -114,19 +116,50 @@ static int rtcpi_close(struct inode* fsdev, struct file * mm_entity) {
 }
 
 static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t count, loff_t * offset) {
-#ifdef DEBUG_MODE
-    printk("rtcPi: write...\n");
-#endif
+    // get current time
+    struct tm curr_time = {
+      .tm_sec = 0,
+      .tm_min = 0,
+      .tm_hour = 0,
+      .tm_mday = 1,
+      .tm_mon = 0,
+      .tm_year = 2020,
+      .tm_wday = 0,
+      .tm_yday = 1
+      };
+    
+     rtc_i2c_write(&curr_time);
+    
+  
+      
+    #ifdef DEBUG_MODE
+        printk("rtcPi: write...\n");
+    #endif
+    
     return 0;
 }
 
 static ssize_t rtcpi_read(struct file * mm_entity, char * buffer, size_t count, loff_t * offset) {
-  //char buf[7];
+    // get current time
+    struct tm curr_time = {
+      .tm_sec = 0,
+      .tm_min = 0,
+      .tm_hour = 0,
+      .tm_mday = 1,
+      .tm_mon = 0,
+      .tm_year = 2020,
+      .tm_wday = 0,
+      .tm_yday = 1
+      };
+    
+     rtc_i2c_read(&curr_time);
   
   //rtc_i2c_read(I2C_RTC_ADDRESS);
 #ifdef DEBUG_MODE
     printk("rtcPi: read...\n");
 #endif
+   
+    
     return 0;
 }
 
@@ -278,4 +311,4 @@ module_exit(rtcpi_exit);
 
 MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR("Felix Knorre <felix-knorre@hotmail.de>");
-MODULE_DESCRIPTION("Raspberry Pi RTC Driver");
+MODULE_DESCRIPTION("rtc cdev driver");
