@@ -38,15 +38,18 @@
 
 #define DEBUG_MODE
 
+#define CURRENT_CENTURY 2000
+
 // rtc register addresses
 #define SEC_ADD 0x0
 #define MIN_ADD 0x1
-#define HR_ADD 0x2
+#define HOUR_ADD 0x2
 #define DAY_ADD 0x3
 #define DATE_ADD 0x4
 #define MON_ADD 0x5
-#define YEAR_ADD 0x2
+#define YEAR_ADD 0x6
 
+// ds3231 client
 static struct i2c_client *rtc_client;
 
 /***************************************/
@@ -57,16 +60,26 @@ static struct i2c_client *rtc_client;
  * get time
  */
 int rtc_i2c_read(struct tm *curr_time){
-    int result = 0;
     int sec, min, hour, mday, mon, year, wday;
     
     // get current time from rtc
     // i2c_master_recv(rtc_client, buf, byte);
     sec = i2c_smbus_read_byte_data(rtc_client, SEC_ADD);
-    
+    min = i2c_smbus_read_byte_data(rtc_client, MIN_ADD);
+    hour = i2c_smbus_read_byte_data(rtc_client, HOUR_ADD);
+    mday = i2c_smbus_read_byte_data(rtc_client, DATE_ADD); //month day 1-31
+    mon = i2c_smbus_read_byte_data(rtc_client, MON_ADD);
+    year = i2c_smbus_read_byte_data(rtc_client, YEAR_ADD);
+    wday = i2c_smbus_read_byte_data(rtc_client, DAY_ADD); // weekday  0-6
     
     // convert from 
     curr_time->tm_sec = bcd2bin(sec);
+    curr_time->tm_min = bcd2bin(min);
+    curr_time->tm_hour = bcd2bin(hour);
+    curr_time->tm_mday = bcd2bin(mday);
+    curr_time->tm_mon = bcd2bin(mon);
+    curr_time->tm_year = bcd2bin(year) + CURRENT_CENTURY;
+    curr_time->tm_wday = bcd2bin(wday);
     
     
     #ifdef DEBUG_MODE
@@ -75,7 +88,7 @@ int rtc_i2c_read(struct tm *curr_time){
         curr_time->tm_hour, curr_time->tm_min, curr_time->tm_sec);
     #endif
     
-    return result;
+    return 0;
 }
 
 /*

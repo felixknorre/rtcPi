@@ -152,14 +152,15 @@ static ssize_t rtcpi_read(struct file * mm_entity, char * buffer, size_t count, 
       .tm_yday = 1
       };
     
+    // get time from rtcI2c driver
      rtc_i2c_read(&curr_time);
-  
-  //rtc_i2c_read(I2C_RTC_ADDRESS);
-#ifdef DEBUG_MODE
-    printk("rtcPi: read...\n");
-#endif
-   
-    
+     
+    #ifdef DEBUG_MODE
+    printk("rtcPi READ: Get DATE: %02d-%02d-%4ld (wday = %d) TIME: %2d:%02d:%02d\n",
+        curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, curr_time.tm_wday,
+        curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+    #endif
+
     return 0;
 }
 
