@@ -64,6 +64,11 @@ int substr(char * src, char * dst, int start, int end){
 			return -1;
 		}
 		
+		if(end < start){
+			printf("start index greater end index...\n");
+			return -1;
+		}
+		
 		for(i = start; i <= end; i++){
 				dst[k] = src[i];
 				k++;
