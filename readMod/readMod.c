@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <wiringPi.h>
 #include <lcd.h>
+#include <string.h>
 
 // WiringPi Pin Numbers
 #define LCD_ROWS 2			// lcd display rows
@@ -47,7 +48,31 @@
 
 // Device and Buffer setup
 #define DEVICE_NAME "/dev/rtcPi"
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 32
+
+int substr(char * src, char * dst, int start, int end){
+		int length = strlen(src);
+		int i,k = 0;
+		
+		if(start < 0  ){
+			printf("invalid start index...\n");
+			return -1;
+		}
+		
+		if(end > length){
+			printf("invalid end index...\n");
+			return -1;
+		}
+		
+		for(i = start; i <= end; i++){
+				dst[k] = src[i];
+				k++;
+		}
+		
+		dst[k] = '\0';
+		
+		return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -55,13 +80,17 @@ int main(int argc, char *argv[])
 	// file descriptor
 	int fd; 
 	// buffer to store the time
-	char buf[BUFFER_SIZE];
+	char buf[BUFFER_SIZE+1];
 	// return value of read 
 	int read_result;
 	// how often should it read ?
-	int count = 5;
+	int count = 10;
 	// interval between read operation(in seconds)
-	int readInterval = 10;
+	int readInterval = 1;
+	// date
+	char date[16];
+	// time
+	char time[16];
 
 	// lcd display setup
 	wiringPiSetup();
@@ -70,15 +99,15 @@ int main(int argc, char *argv[])
 	// start text
 	lcdClear(lcd);
 	lcdPosition(lcd, 4, 0);
-  lcdPuts(lcd, "readMod");
-  lcdPosition(lcd, 4, 1);
-  lcdPuts(lcd, "loaded...");
-  sleep(2);
-  lcdClear(lcd);
+	lcdPuts(lcd, "readMod");
+	lcdPosition(lcd, 4, 1);
+	lcdPuts(lcd, "loaded...");
+	sleep(2);
+	lcdClear(lcd);
     
-  // open mod
-  fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
-  if(fd < 0){
+	// open mod
+	fd = open(DEVICE_NAME, O_RDONLY | O_NONBLOCK);
+	if(fd < 0){
 		// open device failed
 		lcdPosition(lcd, 2, 0);
 		lcdPuts(lcd, "can't open");
@@ -92,7 +121,7 @@ int main(int argc, char *argv[])
 		// open device success
 		while(count > 0){
 			// read datetime
-			read_result = read(fd, buf, BUFFER_SIZE-1);
+			read_result = read(fd, buf, BUFFER_SIZE);
 			if(read_result < 0){
 				// stop if there is an error while reading
 				lcdClear(lcd);
@@ -103,16 +132,29 @@ int main(int argc, char *argv[])
 				sleep(3);
 				break;
 			}
-		
+			
+
+			substr(buf, date, 0, 14);			
+			substr(buf, time, 16, 23);
+	
 			// //display datetime on lcd
-			lcdPosition(lcd, 2, 0);
-			lcdPuts(lcd, "read device");
+			lcdPosition(lcd, 0, 0);
+			//lcdPuts(lcd, "read device");
+			lcdPrintf(lcd, "%s",date);
 			lcdPosition(lcd, 4, 1);
-			lcdPrintf(lcd, "count: %d", count);
+			lcdPrintf(lcd, "%s", time);
 			
 			sleep(readInterval);
 			count--;	
 		}
+		
+		// close dev
+		lcdClear(lcd);
+		lcdPosition(lcd, 4, 0);
+		lcdPuts(lcd, "readMod");
+		lcdPosition(lcd, 4, 1);
+		lcdPuts(lcd, "exiting...");
+		sleep(3);
 		
 		// clean up
 		close(fd);
