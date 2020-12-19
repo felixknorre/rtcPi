@@ -108,8 +108,25 @@ int rtc_i2c_write(struct tm *curr_time){
   return result;
 }
 
+/*
+ * is a rtc connected ?
+ * 0 = rtc is connected
+ * -1 = no client connected
+ */
+
+int rtc_i2c_client_connected(void){
+    if(rtc_client == NULL){
+        return -1;
+    } else {
+        return 0;
+    }
+      
+      
+}
+
 EXPORT_SYMBOL(rtc_i2c_read);
 EXPORT_SYMBOL(rtc_i2c_write);
+EXPORT_SYMBOL(rtc_i2c_client_connected);
 
 /***************************************/
 /*      I2C driver operations          */

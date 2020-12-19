@@ -28,6 +28,9 @@
 #include <linux/i2c.h>
 #include <linux/time.h>
 
+#include <linux/uaccess.h>
+#include <linux/string.h>
+
 // registration
 #define DRIVER_NAME "rtcPi"
 #define CLASS_NAME "rtcPiClass"
@@ -40,19 +43,13 @@
 #define RTC_TYPE_I2C
 //#define RTC_TYPE_USB
 
-// i2c
-/*
-#define I2C_DRIVER_NAME "i2c-rtc"
-#define I2C_RTC_ADDRESS 0x68
-#define I2C_ADAPTER_NR 1
-#define RTC_NAME "my-rtc"
-*/
+#define DATETIME_BUFFER_SIZE 32 // 16x2 lcd -> 32 chars
 
 
-
-// define 
+// define i2c functions
 extern int rtc_i2c_read(struct tm *curr_time);
 extern int rtc_i2c_write(struct tm *curr_time);
+extern int rtc_i2c_client_connected(void);
 
 /***************************************/
 /*       Application Interface         */
@@ -60,54 +57,13 @@ extern int rtc_i2c_write(struct tm *curr_time);
 
 
 static int rtcpi_open(struct inode* fsdev, struct file * mm_entity) {
-  /*
-#ifdef RTC_TYPE_I2C
-
-    struct i2c_client *client;
-    struct i2c_adapter *adapter;
-    char client_name[] = "ds3231";
-
-    adapter = i2c_get_adapter(I2C_ADAPTER_NR);
-    if(adapter == NULL) {
-        return -1;
-    }
-
-    // kzalloc alloc memory and set it to zero
-    //GFP_KERNEL -> get free pages
-    client = kzalloc(sizeof(*client), GFP_KERNEL);
-    if(client == NULL) {
-        return -1;
-    }
-
-    memcpy(&client->name, client_name, sizeof(client_name));
-    client->addr = I2C_ADDRESS;
-    client->adapter = adapter;
-
-    // store data
-    mm_entity->private_data = client;
-
-#endif
-*/
-
-
-
 #ifdef DEBUG_MODE
     printk("rtcPi: opend...\n");
 #endif
-
     return 0;
 }
 
 static int rtcpi_close(struct inode* fsdev, struct file * mm_entity) {
-/*
-#ifdef RTC_TYPE_I2C
-    struct i2c_client *client = mm_entity->private_data;
-    i2c_put_adapter(client->adapter);
-    kfree(client);
-    mm_entity->private_data = NULL;
-#endif
-*/
-
 #ifdef DEBUG_MODE
     printk("rtcPi: closed...\n");
 #endif
@@ -130,8 +86,6 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
     
      rtc_i2c_write(&curr_time);
     
-  
-      
     #ifdef DEBUG_MODE
         printk("rtcPi: write...\n");
     #endif
@@ -140,7 +94,12 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
 }
 
 static ssize_t rtcpi_read(struct file * mm_entity, char * buffer, size_t count, loff_t * offset) {
-    // get current time
+    int result = 0;
+    int format_result;
+    unsigned long copy_result;
+    char datetime_buffer[DATETIME_BUFFER_SIZE+1]; // +1 -> \0 end of string
+    
+    // struct to save datetime
     struct tm curr_time = {
       .tm_sec = 0,
       .tm_min = 0,
@@ -152,16 +111,68 @@ static ssize_t rtcpi_read(struct file * mm_entity, char * buffer, size_t count, 
       .tm_yday = 1
       };
     
-    // get time from rtcI2c driver
-     rtc_i2c_read(&curr_time);
+    // get time from rtcI2c driver, if client is connected
+    if(rtc_i2c_client_connected() == 0){
+        rtc_i2c_read(&curr_time);
+    }
      
     #ifdef DEBUG_MODE
     printk("rtcPi READ: Get DATE: %02d-%02d-%4ld (wday = %d) TIME: %2d:%02d:%02d\n",
         curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, curr_time.tm_wday,
         curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
     #endif
-
-    return 0;
+    
+    // format depending on the week day
+    switch(curr_time.tm_wday){
+        case 1:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Sun, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 2:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Mon, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 3:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Tue, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 4:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Wed, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 5:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Thu, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 6:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Fri, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        case 7:
+          format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), "Sat, %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+          break;
+        default:
+         format_result = snprintf(datetime_buffer, sizeof(datetime_buffer), ", %02d-%02d-%4ld %2d:%02d:%02d\n",
+          curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, 
+          curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+    }
+    
+    // copy current datetime into user space
+    copy_result = copy_to_user(buffer, datetime_buffer, min(count, sizeof(datetime_buffer)));
+    if(copy_result  != 0){
+        printk("rtcPi error: read() counld not copy to user space...\n");
+        result = -1;
+    }
+    
+    return result;
 }
 
 static long rtcpi_ioctl(struct file * mm_entitiy, unsigned int cmd, unsigned long arg) {
@@ -301,7 +312,7 @@ static int __init rtcpi_init(void) {
 static void __exit rtcpi_exit(void) {
     int result = 0;
     
-    printk("rtcPi: deinit...\n");
+    printk("rtcPi: exit...\n");
 
     result = deregistration();
 
