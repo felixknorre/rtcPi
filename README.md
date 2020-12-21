@@ -1,6 +1,8 @@
 # rtcPi
 Raspberry Pi RTC Kernel Module
 
+# -- still in development --
+
 ## Software Setup Raspberry Pi for kernel module development
 
 ### 1. Set timezone 
