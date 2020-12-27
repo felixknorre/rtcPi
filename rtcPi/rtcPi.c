@@ -172,9 +172,8 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
         return -1;
     }
     
-    
-    
     // set new tm values
+    curr_time.tm_wday = 1;
     curr_time.tm_mday = (int)l_mday;
     curr_time.tm_mon = (int)l_mon;
     curr_time.tm_year = (int)l_year;
@@ -188,10 +187,11 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
         curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
     #endif
     
+    //write to rtc
+    if(rtc_i2c_client_connected() == 0){
+      rtc_i2c_write(&curr_time);
+    }
     
-    
-    
-  
     #ifdef DEBUG_MODE
         printk("rtcPi: write...\n");
     #endif

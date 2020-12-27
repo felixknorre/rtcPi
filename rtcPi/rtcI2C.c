@@ -72,7 +72,7 @@ int rtc_i2c_read(struct tm *curr_time){
     year = i2c_smbus_read_byte_data(rtc_client, YEAR_ADD);
     wday = i2c_smbus_read_byte_data(rtc_client, DAY_ADD); // weekday  0-6
     
-    // convert from 
+    // convert data 
     curr_time->tm_sec = bcd2bin(sec);
     curr_time->tm_min = bcd2bin(min);
     curr_time->tm_hour = bcd2bin(hour);
@@ -95,17 +95,60 @@ int rtc_i2c_read(struct tm *curr_time){
  * set time
  */
 int rtc_i2c_write(struct tm *curr_time){
-    int result = 0;
+    int sec, min, hour, mday, mon, year, wday;
+    int result;
     
     #ifdef DEBUG_MODE
     printk("rtcI2C WRITE: Set DATE: %02d-%02d-%4ld (wday = %d) TIME: %2d:%02d:%02d\n",
           curr_time->tm_mday, curr_time->tm_mon, curr_time->tm_year, curr_time->tm_wday,
           curr_time->tm_hour, curr_time->tm_min, curr_time->tm_sec);
     #endif
+    
+    // convert data
+    sec = bin2bcd(curr_time->tm_sec);
+    min = bin2bcd(curr_time->tm_min);
+    hour = bin2bcd(curr_time->tm_hour);
+    mday = bin2bcd(curr_time->tm_mday);
+    mon = bin2bcd(curr_time->tm_mon);
+    year = bin2bcd(curr_time->tm_year - CURRENT_CENTURY);
+    wday = bin2bcd(curr_time->tm_wday);
+    
+    result = i2c_smbus_write_byte_data(rtc_client, DAY_ADD, wday);
+    if(result != 0){
+        printk("rtcI2C error: write to wday register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, SEC_ADD, sec);
+    if(result != 0){
+        printk("rtcI2C error: write to sec register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, MIN_ADD, min);
+    if(result != 0){
+        printk("rtcI2C error: write to min register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, HOUR_ADD, hour);
+    if(result != 0){
+        printk("rtcI2C error: write to hour register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, DATE_ADD, mday);
+    if(result != 0){
+        printk("rtcI2C error: write to mday register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, MON_ADD, mon);
+    if(result != 0){
+        printk("rtcI2C error: write to mon register failed...\n");
+    }
+    
+    result = i2c_smbus_write_byte_data(rtc_client, YEAR_ADD, year);
+    if(result != 0){
+        printk("rtcI2C error: write to year register failed...\n");
+    }
   
-  // set current time to rtc
-  // i2c_master_send(rtc_client, buf, byte);
-  return result;
+  return 0;
 }
 
 /*
