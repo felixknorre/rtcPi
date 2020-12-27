@@ -121,27 +121,72 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
       .tm_yday = 1
       };
     
-    printk("User Space time: %s", buffer);
+     
+    #ifdef DEBUG_MODE
+      printk("User Space time: %s", buffer);
+    #endif
     
+    substr(buffer, c_wday, 0, 2);
     substr(buffer, c_mday, 5, 6);
-    printk("%s", c_mday);
+    substr(buffer, c_mon, 8, 9);
+    substr(buffer, c_year, 11, 14);
+    substr(buffer, c_hour, 16, 17);
+    substr(buffer, c_min, 19, 20);
+    substr(buffer, c_sec, 22, 23);
     
+    
+    // convert string to long
     res = kstrtol(c_mday, 10, &l_mday);
     if(res != 0){
-        printk("rtcPi error: convert string to long failed...\n");
+        printk("rtcPi error: convert mday failed...\n");
         return -1;
     } 
     
+    res = kstrtol(c_mon, 10, &l_mon);
+    if(res != 0){
+        printk("rtcPi error: convert month failed...\n");
+        return -1;
+    }
+     
+    res = kstrtol(c_year, 10, &l_year);
+    if(res != 0){
+        printk("rtcPi error: convert year failed...\n");
+        return -1;
+    }
+    
+    res = kstrtol(c_hour, 10, &l_hour);
+    if(res != 0){
+        printk("rtcPi error: convert hour failed...\n");
+        return -1;
+    }
+    
+    res = kstrtol(c_min, 10, &l_min);
+    if(res != 0){
+        printk("rtcPi error: convert min failed...\n");
+        return -1;
+    }
+    
+    res = kstrtol(c_sec, 10, &l_sec);
+    if(res != 0){
+        printk("rtcPi error: convert sec failed...\n");
+        return -1;
+    }
+    
+    
+    
     // set new tm values
     curr_time.tm_mday = (int)l_mday;
-    
-
+    curr_time.tm_mon = (int)l_mon;
+    curr_time.tm_year = (int)l_year;
+    curr_time.tm_hour = (int)l_hour;
+    curr_time.tm_min = (int)l_min;
+    curr_time.tm_sec = (int)l_sec;
+ 
+    #ifdef DEBUG_MODE
     printk("rtcPi READ: Get DATE: %02d-%02d-%4ld (wday = %d) TIME: %2d:%02d:%02d\n",
         curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, curr_time.tm_wday,
         curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
-
-    
-
+    #endif
     
     
     
