@@ -52,6 +52,39 @@ extern int rtc_i2c_write(struct tm *curr_time);
 extern int rtc_i2c_client_connected(void);
 
 /***************************************/
+/*           help functions            */
+/***************************************/
+
+int substr(const char * src, char * dst, int start, int end){
+		int length = strlen(src);
+		int i,k = 0;
+		
+		if(start < 0  ){
+			printk("rtcPi error: substring invalid start index...\n");
+			return -1;
+		}
+		
+		if(end > length){
+			printk("rtcPi error: substring invalid end index...\n");
+			return -1;
+		}
+		
+		if(end < start){
+			printk("rtcPi error: substring start index greater end index...\n");
+			return -1;
+		}
+		
+		for(i = start; i <= end; i++){
+				dst[k] = src[i];
+				k++;
+		}
+		
+		dst[k] = '\0';
+		
+		return 0;
+}
+
+/***************************************/
 /*       Application Interface         */
 /***************************************/
 
@@ -72,7 +105,11 @@ static int rtcpi_close(struct inode* fsdev, struct file * mm_entity) {
 }
 
 static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t count, loff_t * offset) {
-    // get current time
+    char c_wday[4], c_mday[3], c_mon[3], c_year[5], c_hour[3], c_min[3], c_sec[3];
+    long l_wday, l_mday, l_mon, l_year, l_hour, l_min, l_sec;
+    int res;
+    
+    // struct to save datetime
     struct tm curr_time = {
       .tm_sec = 0,
       .tm_min = 0,
@@ -84,8 +121,32 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
       .tm_yday = 1
       };
     
-     rtc_i2c_write(&curr_time);
+    printk("User Space time: %s", buffer);
     
+    substr(buffer, c_mday, 5, 6);
+    printk("%s", c_mday);
+    
+    res = kstrtol(c_mday, 10, &l_mday);
+    if(res != 0){
+        printk("rtcPi error: convert string to long failed...\n");
+        return -1;
+    } 
+    
+    // set new tm values
+    curr_time.tm_mday = (int)l_mday;
+    
+
+    printk("rtcPi READ: Get DATE: %02d-%02d-%4ld (wday = %d) TIME: %2d:%02d:%02d\n",
+        curr_time.tm_mday, curr_time.tm_mon, curr_time.tm_year, curr_time.tm_wday,
+        curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec);
+
+    
+
+    
+    
+    
+    
+  
     #ifdef DEBUG_MODE
         printk("rtcPi: write...\n");
     #endif
@@ -176,8 +237,6 @@ static ssize_t rtcpi_read(struct file * mm_entity, char * buffer, size_t count, 
 }
 
 static long rtcpi_ioctl(struct file * mm_entitiy, unsigned int cmd, unsigned long arg) {
-    // use arg to set client->addr = 0x68
-    // or don't use it and set client->addr = 0x68 as default
 #ifdef DEBUG_MODE
     printk("rtcPi: ioctl...\n");
 #endif
