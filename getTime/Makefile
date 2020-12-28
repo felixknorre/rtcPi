@@ -4,8 +4,8 @@
 # Copyright 2020 Felix Knorre  <felix-knorre@hotmail.de>
 #
 
-readMod : readMod.c
-	gcc -Wall -o readMod readMod.c -lwiringPi -lwiringPiDev
+readMod : getTime.c
+	gcc -Wall -o getTime getTime.c -lwiringPi -lwiringPiDev
 	
 clean : 
-	rm readMod
+	rm getTime

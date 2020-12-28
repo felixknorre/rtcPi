@@ -1,5 +1,5 @@
 /*
- * readMod.c
+ * getTime.c
  * 
  * Copyright 2020 Felix Knorre <felix-knorre@hotmail.de>
  * 
