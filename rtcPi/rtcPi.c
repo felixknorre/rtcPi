@@ -134,6 +134,26 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
     substr(buffer, c_min, 19, 20);
     substr(buffer, c_sec, 22, 23);
     
+    // convert week day to decimal
+    if(c_wday[0] == 'M' && c_wday[1] == 'o' && c_wday[2] == 'n') {
+        l_wday = 2;
+    } else if(c_wday[0] == 'T' && c_wday[1] == 'u' && c_wday[2] == 'e') {
+        l_wday = 3;
+    } else if(c_wday[0] == 'W' && c_wday[1] == 'e' && c_wday[2] == 'd') {
+        l_wday = 4;
+    } else if(c_wday[0] == 'T' && c_wday[1] == 'h' && c_wday[2] == 'u') {
+        l_wday = 5;
+    } else if(c_wday[0] == 'F' && c_wday[1] == 'r' && c_wday[2] == 'i') {
+        l_wday = 6;
+    } else if(c_wday[0] == 'S' && c_wday[1] == 'a' && c_wday[2] == 't') {
+        l_wday = 7;
+    } else if(c_wday[0] == 'S' && c_wday[1] == 'u' && c_wday[2] == 'n') {
+        l_wday = 1;
+    } else {
+        l_wday = 0;
+        printk("rtcPi error: no valid weekday...\n");
+    }
+    
     
     // convert string to long
     res = kstrtol(c_mday, 10, &l_mday);
@@ -173,7 +193,7 @@ static ssize_t rtcpi_write(struct file * mm_entity, const char * buffer, size_t 
     }
     
     // set new tm values
-    curr_time.tm_wday = 1;
+    curr_time.tm_wday = (int)l_wday;
     curr_time.tm_mday = (int)l_mday;
     curr_time.tm_mon = (int)l_mon;
     curr_time.tm_year = (int)l_year;
