@@ -65,12 +65,33 @@ int rtc_i2c_read(struct tm *curr_time){
     // get current time from rtc
     // i2c_master_recv(rtc_client, buf, byte);
     sec = i2c_smbus_read_byte_data(rtc_client, SEC_ADD);
+    if(sec == -1){
+        printk("rtcI2C error: read to sec register failed...\n");
+    }
     min = i2c_smbus_read_byte_data(rtc_client, MIN_ADD);
+    if(min == -1){
+      printk("rtcI2C error: read to min register failed...\n");
+    }
     hour = i2c_smbus_read_byte_data(rtc_client, HOUR_ADD);
+    if(hour == -1){
+      printk("rtcI2C error: read to hour register failed...\n");
+    }
     mday = i2c_smbus_read_byte_data(rtc_client, DATE_ADD); //month day 1-31
+    if(mday == -1){
+      printk("rtcI2C error: read to mday register failed...\n");
+    }
     mon = i2c_smbus_read_byte_data(rtc_client, MON_ADD);
+    if(mon == -1){
+      printk("rtcI2C error: read to mon register failed...\n");
+    }
     year = i2c_smbus_read_byte_data(rtc_client, YEAR_ADD);
+    if(year == -1){
+      printk("rtcI2C error: read to year register failed...\n");
+    }
     wday = i2c_smbus_read_byte_data(rtc_client, DAY_ADD); // weekday  0-6
+    if(wday == -1){
+      printk("rtcI2C error: read to wday register failed...\n");
+    }
     
     // convert data 
     curr_time->tm_sec = bcd2bin(sec);
