@@ -1,8 +1,6 @@
 # rtcPi
 Raspberry Pi RTC Kernel Module
 
-# -- still in development --
-
 ## Software Setup Raspberry Pi for kernel module development
 
 ### 1. Set timezone 
@@ -83,10 +81,11 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 | HD44780U | Raspberry Pi | wiringPi |
 |----------|--------------|----------|
 | VSS      | Ground       |          |
-| VCC      | 5V           |          |
-| V0       | GPIO 26      |          |
-| RS       | Ground       |          |
-| E        | GPIO 19      |          |
+| VDD      | 5V           |          |
+| V0       | Ground       |          |
+| RS       | GPIO 26      | 25       |
+| RW       | Ground       |          |
+| E        | GPIO 19      | 24       |
 | D0       |              |          |
 | D1       |              |          |
 | D2       |              |          |
@@ -133,8 +132,8 @@ make
 #### De-/Load Module
 
 ```bash
-sudo insmod rtcPi.ko
-sudo rmmod rtcPi
+./loadDriver.sh
+./unloadDriver.sh
 ```
 
 ###  LCD Programm
@@ -142,15 +141,31 @@ sudo rmmod rtcPi
 #### Compile
 
 ```bash
-cd readMod
+cd getTime
 make
 ```
 
 #### Run
 
 ```bash
-./readMod
+sudo ./getTime
 ```
+
+### Set Time
+
+#### Compile
+
+```bash
+cd setTime
+make
+```
+
+#### Run
+
+```bash
+sudo ./setTime
+```
+
 ## Docs
 
 ### Load kernel module when raspberry pi boots
