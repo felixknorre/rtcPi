@@ -1,9 +1,12 @@
 # rtcPi
-Raspberry Pi RTC Kernel Module
+
+This is a kernel module for a DS3231. For demonstration purposes with a LCD display which shows the system time.
+
+![Pi](./images/pi.JPG)
 
 ## Software Setup Raspberry Pi for kernel module development
 
-### 1. Set timezone 
+### 1. Set timezone
 * important for make
 
 ### 2. Expand filesystem
@@ -19,9 +22,9 @@ sudo apt update -y
 sudo apt upgrade -y
 sudo apt install git bc bison flex libssl-dev make
 ```
-  
+
 ### 4. Get sources
-```bash 
+```bash
 git clone --depth=1 https://github.com/raspberrypi/linux
 ```
 * __Note:__ this will take some time...
@@ -61,7 +64,7 @@ sudo apt install libncurses5-dev
 sudo apt install wiringpi
 ```
 
-### 9.(Optional) Create ssh key and add to github 
+### 9.(Optional) Create ssh key and add to github
 
 ```bash
 # create key
@@ -75,6 +78,8 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 ```
 
 ## Hardware Setup
+
+![diagram](./images/diagram.png)
 
 ### HD44780U
 
@@ -114,9 +119,8 @@ xclip -selection clipboard < ~/.ssh/id_rsa.pub
 sudo i2cdetect -y 1
 sudo usermod -aG i2c pi
 ```
-Should show that a device with the address 68 is connected.
+Should show that a device with the address 0x68 is connected.
 
-### DS1302
 
 ## Usage
 
@@ -189,4 +193,3 @@ vim /etc/modules
 * [Buildung Kernel](https://www.raspberrypi.org/documentation/linux/kernel/building.md)
 * [wiringPi](http://wiringpi.com/)
 * [Linux Kernel Labs](https://linux-kernel-labs.github.io/refs/heads/master/labs/device_drivers.html)
-
